@@ -1,0 +1,6 @@
+扫码      QRActivtity,ResultActivity
+//通知      HtmlService(获取HTML),GetNo(转为xml的值),NotificationService(xml发送到后台设置通知)
+支付宝    支付在MainActivity,同步通知是PayResult
+活动通知     NewNotification
+未读信息通知 Messagenote
+倒计时通知   CountdownService
