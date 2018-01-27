@@ -10,8 +10,10 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -27,6 +29,7 @@ import com.alipay.sdk.app.EnvUtils;
 import com.alipay.sdk.app.PayTask;
 import com.rbj.zxing.decode.QrcodeDecode;
 
+import java.io.File;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -204,10 +207,39 @@ public class MainActivity extends AppCompatActivity {
     };
     //图片上传
     private void openImageChooserActivity() {
-        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-        i.addCategory(Intent.CATEGORY_OPENABLE);
-        i.setType("image/*");
-        startActivityForResult(Intent.createChooser(i, "图片选择"), FILE_CHOOSER_RESULT_CODE);
+//        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+//        i.addCategory(Intent.CATEGORY_OPENABLE);
+//        i.setType("image/*");
+//        startActivityForResult(Intent.createChooser(i, "图片选择"), FILE_CHOOSER_RESULT_CODE);
+
+        //1.文件夹和相册
+        Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        pickIntent.setType("image/*");
+
+//        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        Uri imageUri = Uri.fromFile(new File(Environment.getRootDirectory().getAbsolutePath() + "/" + "portrait.jpg"));//getRootDirectory():是手机内存目录 ; getExternalStorageDirectory():是内存卡目录; Context.getFilesDir():本app
+//        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+
+        //2.拍照
+        String path = Environment.getExternalStorageDirectory() + ""; //获取路径
+        String fileName = "PortraitFromCamera.jpg";//定义文件名
+        File file = new File(path,fileName);
+        if(!file.getParentFile().exists()){//文件夹不存在
+            file.getParentFile().mkdirs();
+        }
+        Uri imageUri = Uri.fromFile(file);
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+       // startActivityForResult(intent, FILE_CHOOSER_RESULT_CODE);//takePhotoRequestCode是自己定义的一个请求码
+
+        //3.选择器
+        Intent chooserIntent = Intent.createChooser(pickIntent,
+                getString(R.string.activity_main_pick_both));
+        //将拍照intent设置为额外初始化intent
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
+                new Intent[] { takePhotoIntent });
+
+        startActivityForResult(chooserIntent, FILE_CHOOSER_RESULT_CODE);
     }
 
     @Override
@@ -216,9 +248,12 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == FILE_CHOOSER_RESULT_CODE) {
             if (null == uploadMessage && null == uploadMessageAboveL) return;
             Uri result = data == null || resultCode != RESULT_OK ? null : data.getData();
+
             if (uploadMessageAboveL != null) {
+                //Toast.makeText(this,"1",Toast.LENGTH_SHORT).show();
                 onActivityResultAboveL(requestCode, resultCode, data);
             } else if (uploadMessage != null) {
+                Toast.makeText(this,"2",Toast.LENGTH_SHORT).show();
                 uploadMessage.onReceiveValue(result);
                 uploadMessage = null;
             }
@@ -230,7 +265,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode != FILE_CHOOSER_RESULT_CODE || uploadMessageAboveL == null)
             return;
         Uri[] results = null;
+
         if (resultCode == Activity.RESULT_OK) {
+
             if (intent != null) {
                 String dataString = intent.getDataString();
                 ClipData clipData = intent.getClipData();
@@ -243,6 +280,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (dataString != null)
                     results = new Uri[]{Uri.parse(dataString)};
+            }else{
+                String path = Environment.getExternalStorageDirectory() + ""; //获取路径
+                String fileName = "PortraitFromCamera.jpg";//定义文件名
+                File file = new File(path,fileName);
+                Uri imageUri = Uri.fromFile(file);
+                results=new Uri[]{imageUri};
             }
         }
         uploadMessageAboveL.onReceiveValue(results);
