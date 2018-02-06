@@ -62,6 +62,8 @@ public class MessagenoteService extends Service {
                         Log.v("mns", "field1-->"+rs.getString(1)+"  field2-->"+rs.getString(2));
                         //判断发送方的未读信息数量是否改变，改变则执行通知，并重新储存未读数量
                         if (sharedPreferencesunread.getInt(rs.getString(2),0)!=rs.getInt(4)) {
+                            editorunread.putInt(rs.getString(2),rs.getInt(4));
+                            editorunread.commit();
                             //3.通知
                             Intent intent = new Intent(context, MainActivity.class);
                             intent.putExtra("nolink", "/customer/cosmetologist");
@@ -81,10 +83,6 @@ public class MessagenoteService extends Service {
                             //manager.notify(notification_ID, notification);
                             startForeground(notification_ID, notification);
 
-
-
-                            editorunread.putInt(rs.getString(2),rs.getInt(4));
-                            editorunread.commit();
                             Log.v("unreadid", "" + notification_ID);
                             notification_ID+=notification_ID;
                         }
