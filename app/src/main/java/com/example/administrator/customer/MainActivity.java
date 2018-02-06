@@ -30,9 +30,15 @@ import com.alipay.sdk.app.PayTask;
 import com.rbj.zxing.decode.QrcodeDecode;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
+import id.zelory.compressor.Compressor;
+
 public class MainActivity extends AppCompatActivity {
+
+    private File actualImage;
+    private File compressedImage;
 
     private Context mContext;
     private ValueCallback<Uri> uploadMessage;
@@ -213,14 +219,16 @@ public class MainActivity extends AppCompatActivity {
 //        startActivityForResult(Intent.createChooser(i, "图片选择"), FILE_CHOOSER_RESULT_CODE);
 
         //1.文件夹和相册
-        Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent pickIntent = new Intent();
         pickIntent.setType("image/*");
+        pickIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        pickIntent.setAction(Intent.ACTION_GET_CONTENT);
 
 //        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 //        Uri imageUri = Uri.fromFile(new File(Environment.getRootDirectory().getAbsolutePath() + "/" + "portrait.jpg"));//getRootDirectory():是手机内存目录 ; getExternalStorageDirectory():是内存卡目录; Context.getFilesDir():本app
 //        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 
-        //2.拍照
+        //2.拍照 指定文件名
         String path = Environment.getExternalStorageDirectory() + ""; //获取路径
         String fileName = "PortraitFromCamera.jpg";//定义文件名
         File file = new File(path,fileName);
@@ -274,13 +282,30 @@ public class MainActivity extends AppCompatActivity {
                 if (clipData != null) {
                     results = new Uri[clipData.getItemCount()];
                     for (int i = 0; i < clipData.getItemCount(); i++) {
-                        ClipData.Item item = clipData.getItemAt(i);
-                        results[i] = item.getUri();
+                        final ClipData.Item item = clipData.getItemAt(i);
+                        try {//图片压缩
+                            actualImage = FileUtil.from(this,  item.getUri());
+                            compressedImage=new Compressor(this).compressToFile(actualImage);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Log.d("Compressor", "Compressed image save in " + item.getUri());
+                        //results[i] = item.getUri();
+                        results[i] = android.net.Uri.parse(compressedImage.toURI().toString());
                     }
                 }
-                if (dataString != null)
-                    results = new Uri[]{Uri.parse(dataString)};
+                if (dataString != null) {
+                    try {//图片压缩
+                        actualImage = FileUtil.from(this, intent.getData());
+                        compressedImage = new Compressor(this).compressToFile(actualImage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Log.d("Compresso1r", "Compresse1d image save in " + compressedImage.toURI().toString());
+                    results = new Uri[]{android.net.Uri.parse(compressedImage.toURI().toString())};
+                }
             }else{
+                //拍照不返回intent，所以直接取拍照时指定的图片路径和名称
                 String path = Environment.getExternalStorageDirectory() + ""; //获取路径
                 String fileName = "PortraitFromCamera.jpg";//定义文件名
                 File file = new File(path,fileName);

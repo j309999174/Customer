@@ -29,4 +29,5 @@ dependencies {
     implementation files('libs/core-3.0.0.jar')
     implementation files('libs/mysql-connector-java-5.0.8-bin.jar')
     implementation files('libs/zxingdecode.jar')
+    implementation files('libs/compressor.jar')
 }
