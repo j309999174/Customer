@@ -285,7 +285,12 @@ public class MainActivity extends AppCompatActivity {
                         final ClipData.Item item = clipData.getItemAt(i);
                         try {//图片压缩
                             actualImage = FileUtil.from(this,  item.getUri());
-                            compressedImage=new Compressor(this).compressToFile(actualImage);
+                            //compressedImage=new Compressor(this).compressToFile(actualImage);
+                            compressedImage = new Compressor(this)
+                                    .setMaxWidth(1080)
+                                    .setMaxHeight(1080)
+                                    .setQuality(75)
+                                    .compressToFile(actualImage);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -297,7 +302,12 @@ public class MainActivity extends AppCompatActivity {
                 if (dataString != null) {
                     try {//图片压缩
                         actualImage = FileUtil.from(this, intent.getData());
-                        compressedImage = new Compressor(this).compressToFile(actualImage);
+                        //compressedImage = new Compressor(this).compressToFile(actualImage);
+                        compressedImage = new Compressor(this)
+                                .setMaxWidth(1080)
+                                .setMaxHeight(1080)
+                                .setQuality(75)
+                                .compressToFile(actualImage);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -310,7 +320,19 @@ public class MainActivity extends AppCompatActivity {
                 String fileName = "PortraitFromCamera.jpg";//定义文件名
                 File file = new File(path,fileName);
                 Uri imageUri = Uri.fromFile(file);
-                results=new Uri[]{imageUri};
+                try {//图片压缩
+                    actualImage = file;
+                    //compressedImage = new Compressor(this).compressToFile(actualImage);
+                    compressedImage = new Compressor(this)
+                            .setMaxWidth(1080)
+                            .setMaxHeight(1080)
+                            .setQuality(75)
+                            .compressToFile(actualImage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //results=new Uri[]{imageUri};
+                results=new Uri[]{android.net.Uri.parse(compressedImage.toURI().toString())};
             }
         }
         uploadMessageAboveL.onReceiveValue(results);
