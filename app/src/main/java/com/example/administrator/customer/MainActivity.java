@@ -25,7 +25,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.alipay.sdk.app.EnvUtils;
 import com.alipay.sdk.app.PayTask;
 import com.rbj.zxing.decode.QrcodeDecode;
 
@@ -55,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int SDK_PAY_FLAG = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX);
+        //EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -168,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void run() {
+                Log.i("orderinfo", orderinfo);
                 PayTask alipay = new PayTask(MainActivity.this);
                 Map<String, String> result = alipay.payV2(orderinfo, true);
                 Log.i("msp", result.toString());
@@ -287,9 +287,9 @@ public class MainActivity extends AppCompatActivity {
                             actualImage = FileUtil.from(this,  item.getUri());
                             //compressedImage=new Compressor(this).compressToFile(actualImage);
                             compressedImage = new Compressor(this)
-                                    .setMaxWidth(1080)
-                                    .setMaxHeight(1080)
-                                    .setQuality(75)
+                                    .setMaxWidth(2080)
+                                    .setMaxHeight(2080)
+                                    .setQuality(100)
                                     .compressToFile(actualImage);
                         } catch (IOException e) {
                             e.printStackTrace();
